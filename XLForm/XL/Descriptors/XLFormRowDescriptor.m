@@ -115,9 +115,16 @@
         id cellClass = self.cellClass ?: [XLFormViewController cellClassesForRowDescriptorTypes][self.rowType];
         NSAssert(cellClass, @"Not defined XLFormRowDescriptorType: %@", self.rowType ?: @"");
         if ([cellClass isKindOfClass:[NSString class]]) {
-            NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(cellClass)];
-            if ([bundle pathForResource:cellClass ofType:@"nib"]){
-                _cell = [[bundle loadNibNamed:cellClass owner:nil options:nil] firstObject];
+            UITableView     *tableView = [(XLFormViewController *)self.sectionDescriptor.formDescriptor.delegate tableView];
+            UITableViewCell *reuseCell = [tableView dequeueReusableCellWithIdentifier:self.cellClass];
+            if (reuseCell) {
+                _cell = (XLFormBaseCell *)reuseCell;
+            }
+            else {
+                NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(cellClass)];
+                if ([bundle pathForResource:cellClass ofType:@"nib"]) {
+                    _cell = [[bundle loadNibNamed:cellClass owner:nil options:nil] firstObject];
+                }
             }
         } else {
             _cell = [[cellClass alloc] initWithStyle:self.cellStyle reuseIdentifier:nil];
